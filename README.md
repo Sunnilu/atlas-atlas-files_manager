@@ -1,4 +1,12 @@
 # atlas-atlas-files_manager
+
+how to create an API with Express
+how to authenticate a user
+how to store data in MongoDB
+how to store temporary data in Redis
+how to setup and use a background worker
+
+
 Start a redis-server via docker (or any other method you prefer):
 
 docker run -p 6379:6379 -it redis/redis-stack-server:latest
