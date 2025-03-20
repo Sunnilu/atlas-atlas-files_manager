@@ -154,3 +154,65 @@ exports.getAllFiles = async (req, res) => {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+// PUT /files/:id/publish - Set the file to public
+exports.publishFile = async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers['x-token'];
+
+  // Retrieve the user based on the token
+  const user = await getUserFromToken(token);
+  if (!user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    // Find the file by ID and ensure it's associated with the user
+    const file = await File.findOne({ _id: id, userId: user._id });
+
+    if (!file) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    // Update the isPublic value to true
+    file.isPublic = true;
+    await file.save();
+
+    // Return the updated file
+    return res.status(200).json(file);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// PUT /files/:id/unpublish - Set the file to private
+exports.unpublishFile = async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers['x-token'];
+
+  // Retrieve the user based on the token
+  const user = await getUserFromToken(token);
+  if (!user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    // Find the file by ID and ensure it's associated with the user
+    const file = await File.findOne({ _id: id, userId: user._id });
+
+    if (!file) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    // Update the isPublic value to false
+    file.isPublic = false;
+    await file.save();
+
+    // Return the updated file
+    return res.status(200).json(file);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
