@@ -16,15 +16,14 @@ router.post('/users', UsersController.postNew);
 router.get('/connect', AuthController.getConnect);
 router.get('/disconnect', AuthController.getDisconnect);
 router.get('/users/me', UsersController.getMe);
-//console.log('before call FilesController.getShow');
 
-//File routes
-router.get('/files/:id', FilesController.getShow);
-router.get('/files', FilesController.getIndex);
-router.post('/files', FilesController.postUpload);
-router.put('/files/:id/publish', FilesController.putPublish);
-router.put('/files/:id/unpublish', FilesController.putUnpublish);
-router.get('/files/:id/data', FilesController.getFile);
+// File routes
+router.get('/files/:id', FilesController.getShow); // GET specific file
+router.get('/files', FilesController.getIndex); // GET all files
+router.post('/files', FilesController.postUpload); // POST upload file
+router.put('/files/:id/publish', FilesController.putPublish); // PUT publish file
+router.put('/files/:id/unpublish', FilesController.putUnpublish); // PUT unpublish file
+router.get('/files/:id/data', FilesController.getFile); // GET file content (new route)
 
-module.exports = { router, fileQueue } ;
+module.exports = { router, fileQueue };
 
