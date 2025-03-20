@@ -1,8 +1,7 @@
-// controllers/FilesController.js
-
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fs = require('fs');
+const mime = require('mime-types');
 const User = require('../models/User');
 const File = require('../models/File'); // Assuming you have a File model for storing file metadata
 const redisClient = require('../config/redisClient'); // Redis client
@@ -110,6 +109,55 @@ exports.getFileById = async (req, res) => {
 
     // Return the file document
     return res.status(200).json(file);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// GET /files/:id/data - Retrieve the content of a file based on ID
+exports.getFile = async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers['x-token'];
+
+  // Retrieve the user based on the token
+  const user = await getUserFromToken(token);
+
+  try {
+    // Find the file by ID
+    const file = await File.findById(id);
+
+    if (!file) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    // Check if the file is public and if the user is authenticated or the owner
+    if (!file.isPublic && (!user || user._id !== file.userId)) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    // Handle if the file is a folder
+    if (file.type === 'folder') {
+      return res.status(400).json({ message: "A folder doesn't have content" });
+    }
+
+    // Check if the file exists locally
+    const filePath = file.localPath;
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    // Get the MIME type of the file
+    const mimeType = mime.lookup(filePath);
+    if (!mimeType) {
+      return res.status(400).json({ message: 'Could not determine MIME type' });
+    }
+
+    // Set the appropriate MIME type and stream the file content
+    res.setHeader('Content-Type', mimeType);
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal Server Error' });
