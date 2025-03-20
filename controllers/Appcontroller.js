@@ -2,7 +2,7 @@
 
 const redis = require('redis');
 const mongoose = require('mongoose');
-const User = require('../models/User');  // Assuming you have a User model
+const User = require('../models/User.js');  // Assuming you have a User model
 const File = require('../models/File');  // Assuming you have a File model
 
 // Create Redis client
