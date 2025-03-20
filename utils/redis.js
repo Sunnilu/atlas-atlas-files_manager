@@ -25,7 +25,7 @@ class RedisClient {
         if (err) {
           reject(err);
         } else {
-          resolve(reply);
+          resolve(reply);  // Returns null if the key does not exist
         }
       });
     });
@@ -38,7 +38,7 @@ class RedisClient {
         if (err) {
           reject(err);
         } else {
-          resolve(reply);
+          resolve(reply);  // Should return 'OK' if successful
         }
       });
     });
@@ -51,7 +51,7 @@ class RedisClient {
         if (err) {
           reject(err);
         } else {
-          resolve(reply);
+          resolve(reply);  // Returns 1 if deleted, 0 if key does not exist
         }
       });
     });
