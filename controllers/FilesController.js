@@ -88,3 +88,69 @@ exports.postUpload = async (req, res) => {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+// GET /files/:id - Retrieve a specific file by ID
+exports.getFileById = async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers['x-token'];
+
+  // Retrieve the user based on the token
+  const user = await getUserFromToken(token);
+  if (!user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    // Find the file by ID and ensure it's associated with the user
+    const file = await File.findOne({ _id: id, userId: user._id });
+
+    if (!file) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    // Return the file document
+    return res.status(200).json(file);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// GET /files - Retrieve all files with pagination and based on parentId
+exports.getAllFiles = async (req, res) => {
+  const { parentId = 0, page = 0 } = req.query; // Default to 0 for root folder, page defaults to 0
+  const token = req.headers['x-token'];
+
+  // Retrieve the user based on the token
+  const user = await getUserFromToken(token);
+  if (!user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const pageSize = 20; // Max items per page
+    const skip = page * pageSize; // Calculate how many items to skip for pagination
+
+    // Query files by parentId and userId with pagination
+    const files = await File.aggregate([
+      {
+        $match: {
+          userId: user._id,
+          parentId: parentId, // Match by parentId
+        },
+      },
+      {
+        $skip: skip, // Skip the first 'skip' items
+      },
+      {
+        $limit: pageSize, // Limit the results to 'pageSize' items
+      },
+    ]);
+
+    // Return the list of files
+    return res.status(200).json(files);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
