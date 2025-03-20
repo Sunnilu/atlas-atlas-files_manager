@@ -28,9 +28,16 @@ class DBClient {
       });
   }
 
-  // Check if the connection to MongoDB is alive
-  isAlive() {
-    return this.client.isConnected();
+  // Check if the connection to MongoDB is alive using admin().ping()
+  async isAlive() {
+    try {
+      const db = this.client.db(this.database);
+      const result = await db.admin().ping(); // Perform a simple ping to check connection
+      return result.ok === 1; // If result is ok (1), connection is alive
+    } catch (err) {
+      console.error('MongoDB connection is not alive', err);
+      return false;
+    }
   }
 
   // Get the number of users in the users collection
